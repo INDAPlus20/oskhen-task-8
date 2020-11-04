@@ -1,0 +1,16 @@
+<-Multiply->
+# Assume two integers to multiply are in $a0 and $a1
+# Let "i" loop be $s0 and sum be $s1
+
+move $s0 <- $0 #init $s0
+move $s1 <- $0 #init $s1
+
+:loop
+add $s1 $s1 $a1 #sum += b
+addi $s0 $s0 1 #i+=1
+slt $t0 $s0 $a0 # $t0 == 1 if i < a0 else $t0 == 0
+bne $t0 $0 loop #loop if $t0 != 0
+nop
+:endloop
+
+move $v0 $s1

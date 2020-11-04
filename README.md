@@ -56,3 +56,7 @@ The two nop instructions at the end of faculty after the return instruction seem
 After writing multiplication.asm, the two aren't really comparable since x86_64 seemingly does everything on the stack.
 
 My own written takes in an integer and inputs faculty(n) using syscalls for input/output. Had some trouble debugging since the registers kept overwriting themselves, not sure what the calling/register conventions are so my solution is probably not following those. Especially the $ra with `jal` was troublesome, since I had the calling chain of `main -> faculty -> multiplication`, and using `jal` the $ra got overwritten when trying to jump back from faculty -> main. Other than conventions, nothing strange, not having scopes was annoying but everything worked without any problems.
+
+
+## Sieve
+Spent so much time coding I can't be bothered to document it.. Implemented a sieve as expected, nothing fancy. Played around with a dynamic version afterwards, implemented a ceil(SQRT(n)) macro to improve runtime and disabled printing because MARS couldn't handle printing primes up to `2¹⁶`. Lightningfast, dynamic allocation wasn't much more difficult at all. Wondering about hardware limitations, should be possible to do primes up to `2³² - 1`, *in theory*, but not much room for the processor to move around so maybe `2³⁰` could work?

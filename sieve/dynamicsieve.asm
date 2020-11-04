@@ -16,7 +16,7 @@
 
 .data
 
-err_msg:	.asciiz "Invalid input! Expected integer n, where 1 < n < 65536.\n"
+err_msg:	.asciiz "Invalid input! Expected integer n, where 1 < n < 1073741824.\n"
 newline:	.asciiz "\n"
 space:		.asciiz " "
 
@@ -42,7 +42,7 @@ main:
     syscall                         # read integer from standard input stream to $v0
 
     # validate input
-    li 	    $t0,65536                # $t0 = 1001
+    li 	    $t0,1073741824                # $t0 = 1001
     slt	    $t1,$v0,$t0		        # $t1 = input < 1001
     beq     $t1,$zero,invalid_input # if !(input < 1001), jump to invalid_input
     nop
@@ -76,7 +76,8 @@ outer_loop:
     addi $t0 $t0 1
     bne $t2 $t1 outer_loop
     nop
-    j print_primes
+    #j print_primes
+    j exit_program # Can't print primes when n grows larger
     nop 
 inner_loop:
     add     $t0 $t0 $t2

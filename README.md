@@ -60,3 +60,5 @@ My own written takes in an integer and inputs faculty(n) using syscalls for inpu
 
 ## Sieve
 Spent so much time coding I can't be bothered to document it.. Implemented a sieve as expected, nothing fancy. Played around with a dynamic version afterwards, implemented a ceil(SQRT(n)) macro to improve runtime and disabled printing because MARS couldn't handle printing primes up to `2**16`. Lightningfast, dynamic allocation wasn't much more difficult at all. Wondering about hardware limitations, should be possible to do primes up to `2**32 - 1`, *in theory*, but not much room for the processor to move around so maybe `2**30` could work?
+
+Edit: 2**30 gave the error ```Runtime exception at 0x0040005c: request (1073741823) exceeds available heap storage (syscall 9)```. `2**20` worked but not `2**25`. All of those I got working were still ~1s runtime.

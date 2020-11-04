@@ -52,3 +52,7 @@ For comparison, here's the x86_64 dump of the two functions:
     11bd:	0f 1f 00             	nop    DWORD PTR [rax]
 ```
 The two nop instructions at the end of faculty after the return instruction seem really out of place, especially since they take arguments? Feels like random bits, or something that goes way above my head.
+
+After writing multiplication.asm, the two aren't really comparable since x86_64 seemingly does everything on the stack.
+
+My own written takes in an integer and inputs faculty(n) using syscalls for input/output. Had some trouble debugging since the registers kept overwriting themselves, not sure what the calling/register conventions are so my solution is probably not following those. Especially the $ra with `jal` was troublesome, since I had the calling chain of `main -> faculty -> multiplication`, and using `jal` the $ra got overwritten when trying to jump back from faculty -> main. Other than conventions, nothing strange, not having scopes was annoying but everything worked without any problems.

@@ -19,6 +19,7 @@
 primes:		.space  1000            # reserves a block of 1000 bytes in application memory
 err_msg:	.asciiz "Invalid input! Expected integer n, where 1 < n < 1001.\n"
 newline:	.asciiz "\n"
+space:		.asciiz " "
 
 ### Executable Code Section ###
 
@@ -85,7 +86,7 @@ print_primes:
         nop 
         li $v0 1
         syscall
-        jal print_newline
+        jal print_space
         j print_loop
 invalid_input:
     # print error message
@@ -100,5 +101,10 @@ exit_program:
 print_newline:
     li $v0 4
     la $a0 newline
+    syscall
+    jr $ra
+print_space:
+    li $v0 4
+    la $a0 space
     syscall
     jr $ra

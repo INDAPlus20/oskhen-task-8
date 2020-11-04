@@ -1,2 +1,54 @@
 # oskhen-task-8
 Some MIPS assembly
+
+
+## Multiplication
+For comparison, here's the x86_64 dump of the two functions:
+```
+000000000000113f <multiply>:
+    113f:	f3 0f 1e fa          	endbr64 
+    1143:	55                   	push   rbp
+    1144:	48 89 e5             	mov    rbp,rsp
+    1147:	89 7d ec             	mov    DWORD PTR [rbp-0x14],edi
+    114a:	89 75 e8             	mov    DWORD PTR [rbp-0x18],esi
+    114d:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+    1154:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+    115b:	eb 0a                	jmp    1167 <multiply+0x28>
+    115d:	8b 45 e8             	mov    eax,DWORD PTR [rbp-0x18]
+    1160:	01 45 fc             	add    DWORD PTR [rbp-0x4],eax
+    1163:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+    1167:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    116a:	3b 45 ec             	cmp    eax,DWORD PTR [rbp-0x14]
+    116d:	7c ee                	jl     115d <multiply+0x1e>
+    116f:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    1172:	5d                   	pop    rbp
+    1173:	c3                   	ret    
+```
+```
+0000000000001174 <faculty>:
+    1174:	f3 0f 1e fa          	endbr64 
+    1178:	55                   	push   rbp
+    1179:	48 89 e5             	mov    rbp,rsp
+    117c:	48 83 ec 18          	sub    rsp,0x18
+    1180:	89 7d ec             	mov    DWORD PTR [rbp-0x14],edi
+    1183:	c7 45 fc 01 00 00 00 	mov    DWORD PTR [rbp-0x4],0x1
+    118a:	8b 45 ec             	mov    eax,DWORD PTR [rbp-0x14]
+    118d:	89 45 f8             	mov    DWORD PTR [rbp-0x8],eax
+    1190:	eb 16                	jmp    11a8 <faculty+0x34>
+    1192:	8b 55 f8             	mov    edx,DWORD PTR [rbp-0x8]
+    1195:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    1198:	89 d6                	mov    esi,edx
+    119a:	89 c7                	mov    edi,eax
+    119c:	e8 9e ff ff ff       	call   113f <multiply>
+    11a1:	89 45 fc             	mov    DWORD PTR [rbp-0x4],eax
+    11a4:	83 6d f8 01          	sub    DWORD PTR [rbp-0x8],0x1
+    11a8:	83 7d f8 01          	cmp    DWORD PTR [rbp-0x8],0x1
+    11ac:	7f e4                	jg     1192 <faculty+0x1e>
+    11ae:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    11b1:	c9                   	leave  
+    11b2:	c3                   	ret    
+    11b3:	66 2e 0f 1f 84 00 00 	nop    WORD PTR cs:[rax+rax*1+0x0]
+    11ba:	00 00 00 
+    11bd:	0f 1f 00             	nop    DWORD PTR [rax]
+```
+The two nop instructions at the end of faculty after the return instruction seem really out of place, especially since they take arguments? Feels like random bits, or something that goes way above my head.

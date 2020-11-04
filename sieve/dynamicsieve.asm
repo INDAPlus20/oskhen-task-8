@@ -22,6 +22,18 @@ space:		.asciiz " "
 
 ### Executable Code Section ###
 
+.macro SQRT (%reg)
+
+    li $t8 1
+    sqrtloop:
+         addi $t8 $t8 1
+         mul $t9 $t8 $t8
+         slt $t7 $t9 %reg
+         bne $t7 $zero sqrtloop
+     move %reg $t8
+
+.end_macro
+
 .text
 
 main:
@@ -40,17 +52,19 @@ main:
     nop
     
     # initialise primes array
-    move    $t1,$v0		    # $t1 = Limit for sieve, optimally sqrt(prime_size), currently just n
     li 	    $t2,2		    # $t2 = Counter, the i in primes[i]. Modified from template to start at 2.
     li	    $t3,1		    # $t3 = 1, used to mark i as not prime.
     
     # Dynamically allocate memory
     move $a0 $v0
     move $s6 $v0 # Save size of array in $s6
+    SQRT($v0)
+    move $t1 $v0 # Set limit
     li $v0 9
     syscall
     move $t0 $v0
     move $s5 $v0 # Extra storage since $t0 changes, to start of array
+
     
     addi    $t0 $t0 2		    # If counter starts at 2, prime array should match.
 outer_loop:

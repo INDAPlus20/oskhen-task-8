@@ -64,4 +64,4 @@ Spent so much time coding I can't be bothered to document it.. Implemented a sie
 Edit: 2**30 gave the error ```Runtime exception at 0x0040005c: request (1073741823) exceeds available heap storage (syscall 9)```. `2**20` worked but not `2**25`. All of those I got working were still ~1s runtime.
 
 ### Bitmap
-Realised that instead of flipping bytes to 0 or 1, we could be flipping bits, since the condition "isprime" is binary. Started doing some bitmap(bitarray) testing, managed in theory but in practice the complexity and loop depth in assembly gets complicated when you want to implement this for a sieve.
+Realised that instead of flipping bytes to 0 or 1, we could be flipping bits, since the condition "isprime" is binary. Started doing some bitmap(bitarray) testing, managed in theory but in practice the complexity and loop depth in assembly gets complicated when you want to implement this for a sieve.   

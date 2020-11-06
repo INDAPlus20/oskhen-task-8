@@ -86,3 +86,6 @@ Then doing `A | (1 << (B & 00000111))` forces the bit to 1.
 As before, B is the global "i" counter and A is the correct byte.
 
 First we do `B mod 8` to get the index, then shift the byte that many times right (So that the relevant bit is in the 0th position), the and it with 1 to zero out all other bits and keep the value of the relevant bit in the least significant bit. The result is a byte that is either 0 or 1 depending on the relevant bit's value.
+
+### Summary
+The bitmap implementation was an interesting excercise in the weightoff between memory usage and processor speed. Flipping bytes took 8 times as much memory as flipping bits, which is a huge cutoff. Nonetheless, the implementation was way slower. This makes sense when you think about it, the way I implemented the bitflipping required a lot of bitoperations compared to just adding 1 to a counter.

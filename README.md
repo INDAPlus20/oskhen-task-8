@@ -65,4 +65,5 @@ Edit: 2**30 gave the error ```Runtime exception at 0x0040005c: request (10737418
 
 ### Bitmap
 Realised that instead of flipping bytes to 0 or 1, we could be flipping bits, since the condition "isprime" is binary. Started doing some bitmap(bitarray) testing, managed in theory but in practice the complexity and loop depth in assembly gets complicated when you want to implement this for a sieve.
-Edit: Done with the implementation!
+
+Edit: Done with the implementation! Flipping a bit was done from the principle A := A | (1 << (B & 00000111)), where A is the correct byte and B mod 8 is the bitindex in that byte.

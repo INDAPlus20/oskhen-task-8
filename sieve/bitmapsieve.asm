@@ -92,7 +92,7 @@ srl $t0 $a0 3 # t0 = i >> 3 = i//8, which find the correct byte offset.
 add $t1 $a1 $t0 # Sets $t1 to address + offset, i.e correct byte
 lb $t2 ($t1) #Loads byte
 andi $t3 $a0 7 # t3 = i mod 8, i.e correct bit in byte
-srlv $t4 $t2 $t3 # Byte >> Bit & 1
+srlv $t4 $t2 $t3 # (Byte >> Bit) & 1
 andi $t4 $t4 1
 move $v0 $t4
 POP($t4)

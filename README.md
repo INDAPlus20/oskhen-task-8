@@ -66,7 +66,7 @@ Edit: 2**30 gave the error ```Runtime exception at 0x0040005c: request (10737418
 ### Bitmap
 Realised that instead of flipping bytes to 0 or 1, we could be flipping bits, since the condition "isprime" is binary. Started doing some bitmap(bitarray) testing, managed in theory but in practice the complexity and loop depth in assembly gets complicated when you want to implement this for a sieve.
 
-Edit: Done with the implementation! Flipping a bit was done from the principle `A := A | (1 << (B & 00000111))`, where A is the correct byte and B mod 8 is the bitindex in that byte.
+Edit: Done with the implementation! Flipping a bit was done from the principle `A := A | (1 << (B & 00000111))`, where A is the correct byte and B mod 8 is the bitindex in that byte. Reading a bit is done with `(A >> (B & 00000111)) & 1`.
 
 #### `A := A | (1 << (B & 00000111))` Explanation
 B is global "i" counter, i.e how many bits from starting address.
@@ -81,3 +81,8 @@ A is `B >> 3`, or `B // 8`, which is the correct byte offset
 `1 << (B mod 8)` gives us the correct bit to flip (In this case "make" 1), since we shift the 1 `B mod 8` times, with `B mod 8` being the index.
 
 Then doing `A | (1 << (B & 00000111))` forces the bit to 1.
+
+#### `(A >> (B & 00000111)) & 1` Explanation
+As before, B is the global "i" counter and A is the correct byte.
+
+First we do `B mod 8` to get the index, then shift the byte that many times right (So that the relevant bit is in the 0th position), the and it with 1 to zero out all other bits and keep the value of the relevant bit in the least significant bit. The result is a byte that is either 0 or 1 depending on the relevant bit's value.

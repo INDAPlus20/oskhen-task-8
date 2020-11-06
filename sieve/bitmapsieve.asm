@@ -1,26 +1,20 @@
-##################################################################
-#
-#   Template for subassignment "Inbyggda System-mastern, här kommer jag!"
-#
-#   Author: Viola Söderlund <violaso@kth.se>
-#
-#   Created: 2020-10-25
-#
-#   See: MARS Syscall Sheet (https://courses.missouristate.edu/KenVollmar/mars/Help/SyscallHelp.html)
-#   See: MIPS Instruction Sheet (https://www.kth.se/social/files/563c63c9f276547044e8695f/mips-ref-sheet.pdf)
-#   See: Sieve of Eratosthenes (https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
-#
-##################################################################
+##
+# Push value to application stack.
+# PARAM: Registry with value.
+##
+.macro	PUSH (%reg)
+	addi	$sp,$sp,-4              # decrement stack pointer (stack builds "downwards" in memory)
+	sw	    %reg,0($sp)             # save value to stack
+.end_macro
 
-### Data Declaration Section ###
-
-.data
-
-err_msg:	.asciiz "Invalid input! Expected integer n, where 1 < n < 1073741824.\n"
-newline:	.asciiz "\n"
-space:		.asciiz " "
-
-### Executable Code Section ###
+##
+# Pop value from application stack.
+# PARAM: Registry which to save value to.
+##
+.macro	POP (%reg)
+	lw	    %reg,0($sp)             # load value from stack to given registry
+	addi	$sp,$sp,4               # increment stack pointer (stack builds "downwards" in memory)
+.end_macro
 
 .macro SQRT (%reg)
 
@@ -34,99 +28,118 @@ space:		.asciiz " "
 
 .end_macro
 
+.data
+space:		.asciiz " "
+
 .text
 
-main:
-    # get input
-    li      $v0,5                   # set system call code to "read integer"
-    syscall                         # read integer from standard input stream to $v0
+main: #Takes input and does some initial setup
+li $t6 1 # $t6 is constantly 1, for bitshift
+## Input - Skips validation
+li $v0 5
+syscall
+move $a2 $v0 # $a2 contains size of array (in bits)
+SQRT($v0)
+move $t1 $v0 # $t1 = sqrt(size) = limit for stepsize
+## Dynamically allocates memory (input / 8) bytes, or 1 byte per 8 numbers in input
+srl $a0 $a2 3
+li $v0 9
+syscall
+move $a1 $v0 # $a1 contains pointer to start of array
+li $a0 1 #Starts stepsize at 1 (+1 in steploop)
+j step_loop
+nop
 
-    # validate input
-    li 	    $t0,1073741824                # $t0 = 1001
-    slt	    $t1,$v0,$t0		        # $t1 = input < 1001
-    beq     $t1,$zero,invalid_input # if !(input < 1001), jump to invalid_input
-    nop
-    li	    $t0,1                   # $t0 = 1
-    slt     $t1,$t0,$v0		        # $t1 = 1 < input
-    beq     $t1,$zero,invalid_input # if !(1 < input), jump to invalid_input
-    nop
-    
-    # initialise primes array
-    li 	    $t2,2		    # $t2 = Counter, the i in primes[i]. Modified from template to start at 2.
-    li	    $t3,1		    # $t3 = 1, used to mark i as not prime.
-    
-    # Dynamically allocate memory
-    move $a0 $v0
-    move $s6 $v0 # Save size of array in $s6
-    SQRT($v0)
-    move $t1 $v0 # Set limit
-    li $v0 9
-    syscall
-    move $t0 $v0
-    move $s5 $v0 # Extra storage since $t0 changes, to start of array
 
-    
-    addi    $t0 $t0 2		    # If counter starts at 2, prime array should match.
-outer_loop:
-    move $s0 $t0    # Save pointer before calling inner loop
-    move $t4 $t2    # $t4 used in inner_loop as local counter up to n, while $t2 are the size of steps.
-    jal inner_loop
-    move $t0 $s0    # Restore pointer
-    addi $t2 $t2 1
-    addi $t0 $t0 1
-    bne $t2 $t1 outer_loop
-    nop
-    #j print_primes
-    j exit_program # Can't print primes when n grows larger
-    nop 
-inner_loop:
-    add     $t0 $t0 $t2
-    add     $t4 $t4 $t2
-    slt     $t5 $t1 $t4 # $t5 == 1 if n < counter
-    bne     $t5 $zero return_register # Returns if $t4 > $t1, i.e counter > n
-    sb	    $t3, ($t0)              # primes[i] = 1
-    j inner_loop
+
+
+step_loop:
+addi $a0 $a0 1 #a0 += 1
+slt $s0 $t1 $a0
+bne $s0 $zero print_primes
+move $a3 $a0
+jal read_bit
+nop
+beq $v0 $zero mark_loop
+nop
+j step_loop
+nop
+
+
+mark_loop: #Assumes $a0 is stepsize, $a1 is pointer to start address (does not mark 0 but rather first 0 + stepsize), $a2 is size of array (i.e we want to find primes up to (excluding) $a2). $a3 = i, should start to be = $a0
+add $a3 $a3 $a0 # a3 += stepsize
+slt $t8 $a3 $a2
+beq $t8 $zero step_loop
+nop
+srl $t3 $a3 3 # t3 = i >> 3 = i//8, which find the correct byte offset.
+add $t7 $a1 $t3 #Sets $t7 to startaddress + offset, i.e correct byte to operate on
+lb $t4 ($t7) #Loads the byte into $t4
+PUSH($ra) #Saves $ra then restores in order to work with nested jals.
+jal bitshift
+nop
+POP($ra)
+sb $t4 ($t7) #Stores shifted byte into address
+j mark_loop # Loops
+nop
+
+read_bit: #Assumes $a0 is the ith bit from $a1, returns in $v0 1/0 depending on the value of the bit
+PUSH($t0)
+PUSH($t1)
+PUSH($t2)
+PUSH($t3)
+PUSH($t4)
+srl $t0 $a0 3 # t0 = i >> 3 = i//8, which find the correct byte offset.
+add $t1 $a1 $t0 # Sets $t1 to address + offset, i.e correct byte
+lb $t2 ($t1) #Loads byte
+andi $t3 $a0 7 # t3 = i mod 8, i.e correct bit in byte
+srlv $t4 $t2 $t3 # Byte >> Bit & 1
+andi $t4 $t4 1
+move $v0 $t4
+POP($t4)
+POP($t3)
+POP($t2)
+POP($t1)
+POP($t0)
+jr $ra
+nop
+
+print_primes: # a1 points to start of array, a2 is size in bits
+li $t2 1
+print_primes_loop:
+addi $t2 $t2 1
+slt $t3 $t2 $a2
+beq $t3 $zero exit_program
+move $a0 $t2
+jal read_bit
+nop
+beq $v0 $zero print_v0
+nop
+j print_primes_loop
+
+print_v0:
+move $a0 $t2
+li $v0 1
+syscall
+la $a0 space
+li $v0 4
+syscall
+j print_primes_loop
+
+
+
+bitshift: #Shifts the ith ($a3) bit given that the correct byte is loaded into $t4 (Note: only changes register $t4, need to store byte in byteloop.
+# A := A | (1 << (B & 00000111)) where B is bitcounter ($a3) and A is the correct byte ($t4)
+andi $t5 $a3 7 # (B & 00000111) (Mod 8)
+sllv $t5 $t6 $t5 # (1 << (B & 00000111))
+or $t4 $t4 $t5 # A := A | (1 << (B & 00000111))
+jr $ra
+nop
+
 
 return_register: #Because jeq isn't a thing
     jr $ra
     nop
-
-
-print_primes:
-    move $t0 $s5    # set $t0 to start of primearray
-    addi $t0 $t0 2   # But actually +2 since 0 and 1 are not prime
-    move $t1 $s6     # set $t1 to size of primearray
-    move $t4 $zero   # $t4 used as local counter up to $t1
-    addi $t4 $t4 2
-    print_loop:
-        beq $t4 $t1 exit_program
-        lb $t5 ($t0)
-        addi $t0 $t0 1
-        move $a0 $t4
-        addi $t4 $t4 1
-        beq $t5 $t3 print_loop
-        nop 
-        li $v0 1
-        syscall
-        jal print_space
-        j print_loop
-invalid_input:
-    # print error message
-    li      $v0, 4                  # set system call code "print string"
-    la      $a0, err_msg            # load address of string err_msg into the system call argument registry
-    syscall                         # print the message to standard output stream
-
 exit_program:
     # exit program
     li $v0, 10                      # set system call code to "terminate program"
     syscall                         # exit program
-print_newline:
-    li $v0 4
-    la $a0 newline
-    syscall
-    jr $ra
-print_space:
-    li $v0 4
-    la $a0 space
-    syscall
-    jr $ra

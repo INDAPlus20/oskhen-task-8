@@ -56,7 +56,7 @@ nop
 step_loop:
 addi $a0 $a0 1 #a0 += 1
 slt $s0 $t1 $a0
-bne $s0 $zero exit_program#print_primes
+bne $s0 $zero print_primes
 move $a3 $a0
 jal read_bit
 nop

@@ -75,7 +75,7 @@ srl $t3 $a3 3 # t3 = i >> 3 = i//8, which find the correct byte offset.
 add $t7 $a1 $t3 #Sets $t7 to startaddress + offset, i.e correct byte to operate on
 lb $t4 ($t7) #Loads the byte into $t4
 PUSH($ra) #Saves $ra then restores in order to work with nested jals.
-jal bitshift
+jal setbit
 nop
 POP($ra)
 sb $t4 ($t7) #Stores shifted byte into address
@@ -127,7 +127,7 @@ j print_primes_loop
 
 
 
-bitshift: #Shifts the ith ($a3) bit given that the correct byte is loaded into $t4 (Note: only changes register $t4, need to store byte in byteloop.
+setbit: #Marks the ith ($a3) bit (Set it to 1) given that the correct byte is loaded into $t4 (Note: only changes register $t4, need to store byte in byteloop.
 # A := A | (1 << (B & 00000111)) where B is bitcounter ($a3) and A is the correct byte ($t4)
 andi $t5 $a3 7 # (B & 00000111) (Mod 8)
 sllv $t5 $t6 $t5 # (1 << (B & 00000111))
